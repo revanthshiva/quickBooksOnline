@@ -95,7 +95,7 @@ const ensureAuthenticated = async (req, res, next) => {
     let tokens = loadTokens();
     if (!tokens) {
       console.log('No tokens found, initiating OAuth flow...');
-      return res.redirect('/auth');
+      return res.redirect('/.netlify/functions/api/auth');
     }
 
     let { accessToken, refreshToken, realmId } = tokens;
@@ -114,7 +114,7 @@ const ensureAuthenticated = async (req, res, next) => {
           next();
         } catch (refreshError) {
           console.error('Refresh token expired or invalid, reinitiating OAuth flow...');
-          return res.redirect('/auth');
+          return res.redirect('/.netlify/functions/api/auth');
         }
       } else {
         console.error('Error fetching invoices after authentication check:', error);
