@@ -4,18 +4,20 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "express": "^4.16.4",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "intuit-oauth": "^4.1.2",
     "netlify-lambda": "^1.4.3",
-    "serverless-http": "^1.9.1"
+    "serverless-http": "^1.10.1"
   },
   "devDependencies": {
     "cross-env": "^7.0.3"
   },
-"scripts": {
+  "scripts": {
     "start": "cross-env NODE_ENV=development netlify-lambda serve src",
     "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production netlify-lambda build src"
-},
-
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/owenconti/netlify-express.git"
