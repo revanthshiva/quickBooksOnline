@@ -1,7 +1,6 @@
 const express = require("express");
 const serverless = require("serverless-http");
 const OAuthClient = require('intuit-oauth');
-const fs = require('fs');
 const axios = require('axios');
 
 const app = express();
@@ -26,25 +25,8 @@ const oauthClient = new OAuthClient({
   redirectUri: process.env.REDIRECT_URL
 });
 
-// Load tokens from a file
-const loadTokens = () => {
-  try {
-    const data = fs.readFileSync('tokens.json', 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error loading tokens:', error);
-    return null;
-  }
-};
-
-// Save tokens to a file
-const saveTokens = (tokens) => {
-  try {
-    fs.writeFileSync('tokens.json', JSON.stringify(tokens));
-  } catch (error) {
-    console.error('Error saving tokens:', error);
-  }
-};
+// In-memory token storage
+let tokens = null;
 
 // Refresh access token if expired
 const refreshAccessToken = async (refreshToken) => {
@@ -53,11 +35,12 @@ const refreshAccessToken = async (refreshToken) => {
     const newAccessToken = authResponse.getJson().access_token;
     const newRefreshToken = authResponse.getJson().refresh_token;
 
-    saveTokens({
+    // Update in-memory tokens
+    tokens = {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
       realmId: oauthClient.getToken().realmId || defaultRealmId
-    });
+    };
 
     return newAccessToken;
   } catch (error) {
@@ -92,7 +75,6 @@ const fetchInvoices = async (accessToken, realmId) => {
 // Automatically check and refresh tokens before fetching invoices
 const ensureAuthenticated = async (req, res, next) => {
   try {
-    let tokens = loadTokens();
     if (!tokens) {
       console.log('No tokens found, initiating OAuth flow...');
       return res.redirect('/.netlify/functions/api/auth');
@@ -135,11 +117,12 @@ router.get('/callback', async (req, res) => {
     const refreshToken = authResponse.getJson().refresh_token;
     const realmId = oauthClient.getToken().realmId || defaultRealmId;
 
-    saveTokens({
+    // Store tokens in memory
+    tokens = {
       accessToken,
       refreshToken,
       realmId
-    });
+    };
 
     res.send('Authorization successful, tokens saved. You can now access /invoices');
   } catch (error) {
@@ -174,4 +157,3 @@ app.use(`/.netlify/functions/api`, router);
 
 module.exports = app;
 module.exports.handler = serverless(app);
-
