@@ -13,7 +13,7 @@ const invoices = [
 ];
 
 
-router.get("/", (req, res) => {
+router.get("/invoices", (req, res) => {
   res.json(invoices);
 });
 
